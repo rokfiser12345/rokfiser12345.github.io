@@ -3,7 +3,11 @@
  * License https://froala.com/wysiwyg-editor/terms/
  * Copyright 2014-2020 Froala Labs
  */
-
+ @media (max-width:405px){
+   .u-sheet{
+     width:405px;
+   }
+ }
 .fr-clearfix::after {
   clear: both;
   display: block;
@@ -8438,7 +8442,7 @@ section.u-image,
 }
 @media (max-width: 575px) {
   .u-sheet {
-    width: 340px;
+    width: 250px;
   }
 }
 .u-sheet .u-sheet {
