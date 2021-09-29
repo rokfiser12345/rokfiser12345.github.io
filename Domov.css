@@ -318,6 +318,7 @@
   }
 
   .u-section-3 .u-image-1 {
+    margin-left:-20%;
     width: 340px;
     height: 191px;
   }
@@ -347,6 +348,7 @@
 
 @media (max-width: 575px) {
   .u-section-4 .u-text-2 {
+    margin-left:-20%;
     width: 340px;
   }
 }
