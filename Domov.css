@@ -8,7 +8,7 @@
 
 .u-section-1 .u-image-1 {
   min-height: 589px;
-  background-image: url("images/received_1637978869692309.jpeg");
+  background-image: url("images/naslovnaBackground2.jpeg");
   background-position: 50% 50%;
 }
 
@@ -232,7 +232,7 @@
     padding-right: 10px;
   }
 }.u-section-3 {
-  background-image: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("images/28869185-0.jpeg");
+  background-image: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("images/flameBackground.jpeg");
   background-position: 50% 50%;
 }
 
