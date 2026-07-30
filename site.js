@@ -226,12 +226,169 @@
     document.querySelectorAll('[data-u-ride="carousel"]').forEach(createCarousel);
   }
 
+  /* ---------- Click-to-navigate tiles ---------- */
+  // Nicepage lets non-link elements (the vehicle gallery tiles on Oprema.html)
+  // navigate via a plain data-href attribute instead of wrapping them in <a>.
+  function initDataHrefLinks() {
+    document.addEventListener("click", function (event) {
+      var el = event.target.closest("[data-href]:not(.u-back-to-top)");
+      if (!el) return;
+      var target = el.getAttribute("data-target");
+      if (target) window.open(el.getAttribute("data-href"), target);
+      else window.location.href = el.getAttribute("data-href");
+    });
+  }
+
+  /* ---------- Contact form ---------- */
+  // Nicepage renders the submit control as a styled <a href="#"> (with a
+  // hidden real <input type="submit"> next to it) and normally wires the
+  // click itself; that wiring never got ported here, so right now clicking
+  // "Poslji" just navigates to "#" and does nothing. This restores it, and
+  // submits via fetch so the existing success/error message divs can be
+  // shown inline instead of leaving the page.
+  function initContactForms() {
+    document.querySelectorAll(".u-form form").forEach(function (form) {
+      var successMsg = form.querySelector(".u-form-send-success");
+      var errorMsg = form.querySelector(".u-form-send-error");
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (successMsg) successMsg.style.display = "none";
+        if (errorMsg) errorMsg.style.display = "none";
+
+        fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+          headers: { Accept: "application/json" },
+        })
+          .then(function (response) {
+            if (response.ok) {
+              form.reset();
+              if (successMsg) successMsg.style.display = "block";
+            } else if (errorMsg) {
+              errorMsg.style.display = "block";
+            }
+          })
+          .catch(function () {
+            if (errorMsg) errorMsg.style.display = "block";
+          });
+      });
+    });
+
+    document.addEventListener("click", function (event) {
+      var trigger = event.target.closest(".u-btn-submit");
+      if (!trigger) return;
+      event.preventDefault();
+      var form = trigger.closest("form");
+      if (form) form.requestSubmit();
+    });
+  }
+
+  /* ---------- Vehicle gallery (data-driven) ---------- */
+  // Oprema.html's vehicle grid renders from window.VOZILA (vozila-data.js),
+  // so the tile count always matches however many vehicles are listed there
+  // - no leftover placeholder tile needed to round out the grid.
+  function initVehiclesGallery() {
+    var container = document.getElementById("vozila-gallery");
+    if (!container || !window.VOZILA) return;
+
+    container.innerHTML = window.VOZILA
+      .map(function (vehicle, i) {
+        var n = i + 1;
+        return (
+          '<div class="u-effect-fade u-gallery-item u-gallery-item-' + n + '" data-href="' + escapeHtml(vehicle.href) + '">' +
+            '<div class="u-back-slide" data-image-width="' + vehicle.imgWidth + '" data-image-height="' + vehicle.imgHeight + '">' +
+              '<img class="u-back-image u-expanded" src="' + escapeHtml(vehicle.img) + '" alt="' + escapeHtml(vehicle.title) + '">' +
+            "</div>" +
+            '<div class="u-align-center u-over-slide u-shading u-over-slide-' + n + '">' +
+              '<h3 class="u-gallery-heading">' + escapeHtml(vehicle.title) + "</h3>" +
+              '<p class="u-gallery-text"></p>' +
+            "</div>" +
+          "</div>"
+        );
+      })
+      .join("");
+  }
+
+  /* ---------- Intervencije listing (data-driven) ---------- */
+  // Both blog/blog.html's table and the home page's newest-N cards render
+  // from window.INTERVENCIJE (intervencije-data.js) so adding one entry
+  // there updates both places - no-ops if that script isn't loaded or the
+  // page has neither target container.
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function formatDate(iso) {
+    var parts = iso.split("-");
+    return Number(parts[2]) + "." + Number(parts[1]) + "." + parts[0];
+  }
+
+  function sortedInterventions() {
+    return window.INTERVENCIJE.slice().sort(function (a, b) {
+      return b.date.localeCompare(a.date);
+    });
+  }
+
+  function initInterventionsTable() {
+    var tbody = document.getElementById("intervencije-rows");
+    if (!tbody || !window.INTERVENCIJE) return;
+
+    tbody.innerHTML = sortedInterventions()
+      .map(function (item) {
+        // This table lives at blog/blog.html; entries are stored relative
+        // to the site root ("blog/x.html"), so drop that shared prefix.
+        var href = item.href.replace(/^blog\//, "");
+        return (
+          "<tr><td>" + formatDate(item.date) + "</td>" +
+          '<td><a href="' + escapeHtml(href) + '">' + escapeHtml(item.title) + "</a></td></tr>"
+        );
+      })
+      .join("");
+  }
+
+  function initInterventionsHome() {
+    var container = document.getElementById("intervencije-home");
+    if (!container || !window.INTERVENCIJE) return;
+    var count = Number(container.getAttribute("data-count")) || 2;
+
+    container.innerHTML = sortedInterventions()
+      .slice(0, count)
+      .map(function (item) {
+        var href = escapeHtml(item.href);
+        var title = escapeHtml(item.title);
+        return (
+          '<div class="u-blog-post u-container-style u-repeater-item">' +
+            '<div class="u-container-layout u-similar-container u-container-layout-1">' +
+              '<h2 class="u-blog-control u-custom-font u-font-roboto-slab u-text">' +
+                '<a class="u-post-header-link" href="' + href + '">' + title + "</a>" +
+              "</h2>" +
+              '<a class="u-post-header-link" href="' + href + '">' +
+                '<img alt="" class="u-blog-control u-expanded-width u-image u-image-default u-image-1" src="' + escapeHtml(item.img) + '">' +
+              "</a>" +
+              '<div class="u-blog-control u-custom-font u-font-roboto-slab u-post-content u-text u-text-3">' + escapeHtml(item.teaser) + "</div>" +
+              '<div class="u-blog-control u-custom-font u-font-roboto-slab u-metadata u-metadata-1">' +
+                '<span class="u-meta-date u-meta-icon">' + formatDate(item.date) + "</span>" +
+              "</div>" +
+              '<a href="' + href + '" class="u-active-none u-blog-control u-border-2 u-border-palette-1-base u-btn u-btn-rectangle u-button-style u-custom-font u-font-roboto-slab u-hover-none u-none u-btn-1">Preberi več</a>' +
+            "</div>" +
+          "</div>"
+        );
+      })
+      .join("");
+  }
+
   /* ---------- Boot ---------- */
   initResponsiveMode();
 
   document.addEventListener("DOMContentLoaded", function () {
     initMobileMenu();
     initCarousels();
+    initDataHrefLinks();
+    initContactForms();
+    initVehiclesGallery();
+    initInterventionsTable();
+    initInterventionsHome();
   });
 
   // Nicepage ships galleries with a "no transition" guard so the first

@@ -153,8 +153,6 @@
   .u-section-1 .u-over-slide-2 {
     width: 340px;
   }
-}.u-section-2 .u-sheet-1 {
-  min-height: 786px;
 }
 
 .u-section-2 .u-text-1 {
@@ -162,14 +160,30 @@
 }
 
 .u-section-2 .u-gallery-1 {
-  height: 553px;
+  height: auto;
   grid-gap: 17px 17px;
   margin: 18px auto 60px;
 }
 
+/* Flexbox instead of grid: with a variable vehicle count the last row is
+   often incomplete (e.g. 5 vehicles = a row of 3 + a row of 2), and unlike
+   grid's shared column tracks, each flex line centers its own leftover
+   space independently - so a short last row centers instead of hugging
+   the left edge under the full rows above it. */
 .u-section-2 .u-gallery-inner-1 {
-  grid-template-columns: auto auto auto;
-  grid-gap: 17px 17px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 17px;
+}
+
+/* Flex items don't size themselves like grid columns, so each tile needs
+   an explicit width (flex-basis, one per breakpoint below) - and, since
+   the back-slide image inside is `height: 100%`, an aspect-ratio so it has
+   a real height to resolve that percentage against. */
+.u-section-2 .u-gallery-item {
+  aspect-ratio: 16 / 9;
+  flex: 0 0 calc((100% - 34px) / 3);
 }
 
 .u-section-2 .u-gallery-item-1 {
@@ -227,64 +241,40 @@
 }
 
 @media (max-width: 1199px) {
-  .u-section-2 .u-sheet-1 {
-    min-height: 689px;
-  }
-
   .u-section-2 .u-gallery-1 {
-    height: 456px;
     margin-right: initial;
     margin-left: initial;
-  }
-
-  .u-section-2 .u-gallery-inner-1 {
-    grid-template-columns: repeat(3, auto);
   }
 }
 
 @media (max-width: 991px) {
-  .u-section-2 .u-sheet-1 {
-    min-height: 1018px;
-  }
-
   .u-section-2 .u-gallery-1 {
-    height: 786px;
     margin-right: initial;
     margin-left: initial;
   }
 
-  .u-section-2 .u-gallery-inner-1 {
-    grid-template-columns: repeat(2, auto);
+  .u-section-2 .u-gallery-item {
+    flex-basis: calc((100% - 17px) / 2);
   }
 }
 
 @media (max-width: 767px) {
-  .u-section-2 .u-sheet-1 {
-    min-height: 2194px;
-  }
-
   .u-section-2 .u-gallery-1 {
-    height: 2358px;
     margin-right: initial;
     margin-left: initial;
   }
 
-  .u-section-2 .u-gallery-inner-1 {
-    grid-template-columns: repeat(1, auto);
+  .u-section-2 .u-gallery-item {
+    flex-basis: 100%;
   }
 }
 
 @media (max-width: 575px) {
-  .u-section-2 .u-sheet-1 {
-    min-height: 1468px;
-  }
-
   .u-section-2 .u-text-1 {
     margin-left: 538px;
   }
 
   .u-section-2 .u-gallery-1 {
-    height: 1485px;
     margin-right: initial;
     margin-left: initial;
   }
